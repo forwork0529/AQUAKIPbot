@@ -9,27 +9,43 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"time"
 )
 
+
 func main(){
-	bot := myBot.New(getToken(),&structs.Vars)
+	bot := myBot.New(getToken(),&structs.Vars) // Создали бота передали общие переменные
 
-	bot.Start()
+	bot.Start() // Запустили бота в работу
 
-	input := comPort.New("COM20", 9600)
-	fmt.Println("Hello world")
-	computer.New(input, &structs.Vars)
-	signalChannel := make(chan os.Signal, 1)
-	signal.Notify(signalChannel, os.Interrupt)
-	select{}
+	input := comPort.New("COM20", 9600)  // Запустили чтение из com порта
+	computer.New(input, &structs.Vars)	// Запустили обработку общих переменных
+	fmt.Println("All functions started..")
+	endFunc() // функция для прерывания работы программы на ctrl + c
 }
 
 
 func getToken()string{
-	pwd, err := os.Getwd()
-	tokenB, err := os.ReadFile(pwd + "/files/token.txt")
+
+	tokenB, err := os.ReadFile("../files/token.txt")
+
 	if err != nil{
-		log.Fatal(err)
+		pwd, err := os.Getwd()
+		tokenB, err = os.ReadFile(pwd + `\files\token.txt`)
+			if err != nil{
+				log.Fatalf("cant read token file: %v", err)
+			}
 	}
 	return string(tokenB)
+}
+
+func endFunc(){
+	signalChannel := make(chan os.Signal, 1)
+	signal.Notify(signalChannel, os.Interrupt)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	<- c
+	fmt.Println("the application is being terminated..")
+	time.Sleep(time.Second * 2)
+
 }
