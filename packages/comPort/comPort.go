@@ -17,9 +17,10 @@ func New(name string, baud int) <- chan string{
 	}
 
 	reader := bufio.NewReader(s)
+	var str string
 	go func(){
 		for{
-			str, err := reader.ReadString('.')
+			str, err = reader.ReadString('.')
 			if err != nil {
 				fmt.Printf("cant read from comPort: %v\n", err)
 			}

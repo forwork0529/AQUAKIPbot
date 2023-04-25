@@ -13,12 +13,12 @@ type MyBot struct{
 	notifiedChats []int64
 }
 
-func New(token string, Vars *structs.TypeVars)* MyBot{
+func New(token string, vars *structs.TypeVars)* MyBot{
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		log.Panic(err)
 	}
-	return &MyBot{bot :bot, vars : Vars}
+	return &MyBot{bot :bot, vars : vars}
 }
 
 
@@ -61,15 +61,15 @@ func (mb *MyBot) Start() {
 			case "/start":
 				msg.ReplyMarkup = numericKeyboard
 			case "Система":
-				msg.Text = fmt.Sprintf("Cистема:\n Статус: %v\n Аварии: %v\n", mb.vars.SystemState, mb.vars.NumOfAlarms)
+				msg.Text = fmt.Sprintf("Cистема:\n Статус: %v\n Аварии: %v\n Температура снаружи: %v\n", mb.vars.SystemState, mb.vars.NumOfAlarms, mb.vars.TempOutdoorNow)
 			case "Котлы":
 				msg.Text = fmt.Sprintf("КОТЛЫ:\n  Котёл 1: %v\n  Котёл 1(аварии): %v\n  Котёл 2: %v\n  Котёл 2(аварии): %v\n", mb.vars.Boiler1State, mb.vars.Boiler1Alarm, mb.vars.Boiler2State, mb.vars.Boiler2Alarm)
 			case "Отопление":
-				msg.Text = fmt.Sprintf("ОТОПЛЕНИЕ: \n Температура сейчас: %v\n 1 час назад: %v\n 2 часа назад: %v\n 3 часа назад: %v\n 4 часа назад: %v\n", mb.vars.HArray[0], mb.vars.HArray[1], mb.vars.HArray[2], mb.vars.HArray[3], mb.vars.HArray[4])
+				msg.Text = fmt.Sprintf("ОТОПЛЕНИЕ: \n Температура сейчас: %v\n", mb.vars.TempHeaterNow)
 			case "ГВС":
-				msg.Text = fmt.Sprintf("ГВС: \n Температура сейчас: %v\n 1 час назад: %v\n 2 часа назад: %v\n 3 часа назад: %v\n 4 часа назад: %v\n", mb.vars.HWSArray[0], mb.vars.HWSArray[1], mb.vars.HWSArray[2], mb.vars.HWSArray[3], mb.vars.HWSArray[4])
+				msg.Text = fmt.Sprintf("ГВС: \n Температура сейчас: %v\n", mb.vars.TempGVSNow)
 			case "Подпитка":
-				msg.Text = fmt.Sprintf("ПОДПИТКА:\n Давление в системе: %v\n Включений за час: %v\n", mb.vars.RechPress, mb.vars.RechCount)
+				msg.Text = fmt.Sprintf("ПОДПИТКА:\n Давление в системе: %v\n Включений за час: %v\n", mb.vars.SystemPress, mb.vars.RechargeCount)
 
 			case "СБРОС":
 				msg.Text = fmt.Sprintf("Аварии сброшены!")

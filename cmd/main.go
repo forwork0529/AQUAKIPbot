@@ -1,14 +1,17 @@
 package main
 
 import (
-	"AquaBot/packages/comPort"
+	//"AquaBot/packages/comPort"
 	"AquaBot/packages/computer"
 	"AquaBot/packages/myBot"
 	"AquaBot/packages/structs"
+	"AquaBot/packages/tcpServer"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"runtime"
 	"time"
 )
 
@@ -17,8 +20,8 @@ func main(){
 	bot := myBot.New(getToken(),&structs.Vars) // Создали бота передали общие переменные
 
 	bot.Start() // Запустили бота в работу
-
-	input := comPort.New("COM20", 9600)  // Запустили чтение из com порта
+	//input := comPort.New("COM16", 9600)  // Запустили чтение из com порта
+	input := tcpServer.New()  // Запустили чтение из com порта
 	computer.New(input, &structs.Vars)	// Запустили обработку общих переменных
 	fmt.Println("All functions started..")
 	endFunc() // функция для прерывания работы программы на ctrl + c
@@ -27,7 +30,11 @@ func main(){
 
 func getToken()string{
 
-	tokenB, err := os.ReadFile("../files/token.txt")
+	_, b, _, _ := runtime.Caller(0)
+	projectRootPath := filepath.Join(filepath.Dir(b), "../")
+	tokenPath := projectRootPath + "/files/token.txt"
+
+	tokenB, err := os.ReadFile(tokenPath)
 
 	if err != nil{
 		pwd, err := os.Getwd()
@@ -47,5 +54,4 @@ func endFunc(){
 	<- c
 	fmt.Println("the application is being terminated..")
 	time.Sleep(time.Second * 2)
-
 }
