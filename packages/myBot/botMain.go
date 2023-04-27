@@ -1,6 +1,7 @@
 package myBot
 
 import (
+	"AquaBot/packages/graph"
 	"AquaBot/packages/structs"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -56,6 +57,8 @@ func (mb *MyBot) Start() {
 			mb.ChatsToNotifie(update.Message.Chat.ID)
 
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+			var path tgbotapi.FilePath = "./output.png"
+			msgPic := tgbotapi.NewPhoto(update.Message.Chat.ID, path)
 
 			switch update.Message.Text {
 			case "/start":
@@ -66,8 +69,10 @@ func (mb *MyBot) Start() {
 				msg.Text = fmt.Sprintf("КОТЛЫ:\n  Котёл 1: %v\n  Котёл 1(аварии): %v\n  Котёл 2: %v\n  Котёл 2(аварии): %v\n", mb.vars.Boiler1State, mb.vars.Boiler1Alarm, mb.vars.Boiler2State, mb.vars.Boiler2Alarm)
 			case "Отопление":
 				msg.Text = fmt.Sprintf("ОТОПЛЕНИЕ: \n Температура сейчас: %v\n", mb.vars.TempHeaterNow)
+				graph.Draw("Hello", []float64{})
 			case "ГВС":
 				msg.Text = fmt.Sprintf("ГВС: \n Температура сейчас: %v\n", mb.vars.TempGVSNow)
+				graph.Draw("Hello", []float64{})
 			case "Подпитка":
 				msg.Text = fmt.Sprintf("ПОДПИТКА:\n Давление в системе: %v\n Включений за час: %v\n", mb.vars.SystemPress, mb.vars.RechargeCount)
 
@@ -80,6 +85,12 @@ func (mb *MyBot) Start() {
 			if _, err := mb.bot.Send(msg); err != nil {
 				log.Panic(err)
 			}
+			if update.Message.Text == "Отопление" || update.Message.Text == "ГВС"{
+				if _, err := mb.bot.Send(msgPic); err != nil {
+					log.Panic(err)
+				}
+			}
+
 		}
 
 	}()
