@@ -45,7 +45,7 @@ func handleConn(conn net.Conn, input chan string) {
 	// Чтение сообщения от клиента.
 	reader := bufio.NewReader(conn)
 	for{
-		b, err := reader.ReadString('.')
+		b, err := reader.ReadString(';')
 		if err != nil {
 			log.Println(err)
 			return

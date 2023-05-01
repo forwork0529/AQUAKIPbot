@@ -6,6 +6,7 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
+	"time"
 )
 
 type MyBot struct{
@@ -31,17 +32,19 @@ func (mb *MyBot) Start() {
 
 
 		for{
-			if mb.vars.Boiler1Alarm  == 0 {
+			mb.vars.AlarmsMutex.Lock()
+			if mb.vars.Alarms["Котёл1"]  == 0 {
 				canSand = true
 			}
-			if canSand && mb.vars.Boiler1Alarm != 0{
+			if canSand && mb.vars.Alarms["Котёл1"] != 0{
 				canSand = false
 				for _, chatID := range mb.notifiedChats{
 					msg := tgbotapi.NewMessage(chatID, "Авария котла 1")
 					mb.bot.Send(msg)
 				}
 			}
-
+			mb.vars.AlarmsMutex.Unlock()
+			time.Sleep(time.Second * 60)
 		}
 	}()
 	go func() {
@@ -64,15 +67,30 @@ func (mb *MyBot) Start() {
 			case "/start":
 				msg.ReplyMarkup = numericKeyboard
 			case "Система":
-				msg.Text = fmt.Sprintf("Cистема:\n Статус: %v\n Аварии: %v\n Температура снаружи: %v\n", mb.vars.SystemState, mb.vars.NumOfAlarms, mb.vars.TempOutdoorNow)
+				var errors string
+				for key, value := range structs.Vars.Alarms{
+					if value > 0{
+						errors += fmt.Sprintf(" %v ", key)
+					}
+				}
+
+				msg.Text = fmt.Sprintf("Cистема:\n Связь с ПЛК: %v\n Аварии:%v\n Температура снаружи: %v\n", mb.vars.ConnectionState, errors, mb.vars.TempOutdoorNow)
 			case "Котлы":
-				msg.Text = fmt.Sprintf("КОТЛЫ:\n  Котёл 1: %v\n  Котёл 1(аварии): %v\n  Котёл 2: %v\n  Котёл 2(аварии): %v\n", mb.vars.Boiler1State, mb.vars.Boiler1Alarm, mb.vars.Boiler2State, mb.vars.Boiler2Alarm)
+				msg.Text = fmt.Sprintf("КОТЛЫ:\n  Котёл 1: %v\n  Котёл 2: %v\n", mb.vars.Boiler1State, mb.vars.Boiler2State)
 			case "Отопление":
-				msg.Text = fmt.Sprintf("ОТОПЛЕНИЕ: \n Температура сейчас: %v\n", mb.vars.TempHeaterNow)
-				graph.Draw("Hello", []float64{})
+				var array []float64
+				mb.vars.HTMutex.Lock()
+				array = mb.vars.HTArray
+				mb.vars.HTMutex.Unlock()
+				msg.Text = fmt.Sprintf("ОТОПЛЕНИЕ: \n Температура сейчас: %v\n", array[11])
+				graph.Draw("Температура Отопление", array)
 			case "ГВС":
-				msg.Text = fmt.Sprintf("ГВС: \n Температура сейчас: %v\n", mb.vars.TempGVSNow)
-				graph.Draw("Hello", []float64{})
+				var array []float64
+				mb.vars.GVSTMutex.Lock()
+				array = mb.vars.GVSTArray
+				mb.vars.GVSTMutex.Unlock()
+				msg.Text = fmt.Sprintf("ГВС: \n Температура сейчас: %v\n", array[11])
+				graph.Draw("Температура ГВС", array)
 			case "Подпитка":
 				msg.Text = fmt.Sprintf("ПОДПИТКА:\n Давление в системе: %v\n Включений за час: %v\n", mb.vars.SystemPress, mb.vars.RechargeCount)
 
@@ -90,9 +108,7 @@ func (mb *MyBot) Start() {
 					log.Panic(err)
 				}
 			}
-
 		}
-
 	}()
 }
 

@@ -1,32 +1,45 @@
 package structs
 
+import "sync"
+
+const(
+	OK = "OK"
+	NO = "НЕТ"
+	ON = "В РАБОТЕ"
+	OFF = "ВЫКЛ"
+)
+
 type TypeVars struct{
-	SystemState    string
-	NumOfAlarms    int
-	Boiler1State   string
-	Boiler1Alarm   int
-	Boiler2State   string
-	Boiler2Alarm   int
-	TempHeaterNow  float64
-	TempGVSNow     float64
-	TempOutdoorNow float64
-	HArray         []int
-	HWSArray       []int
-	SystemPress    float64
-	RechargeCount  int
+	ConnectionState	string
+	AlarmsMutex		sync.Mutex
+	Alarms    		map[string]int
+	Boiler1State   	string
+	Boiler2State  	string
+	TempOutdoorNow  float64
+	GVSTMutex		sync.Mutex
+	GVSTArray      	[]float64
+	HTMutex			sync.Mutex
+	HTArray       	[]float64
+	SystemPress   	float64
+	ReCoMutex     	sync.Mutex
+	RechargeCount 	int
 }
 
 var (
+
 	Vars = TypeVars{
-		SystemState :  "РАБОТАЕТ",
-		NumOfAlarms :  0,
-		Boiler1State : "РАБОТАЕТ",
-		Boiler1Alarm : 0,
-		Boiler2State : "СТОП",
-		Boiler2Alarm : 0,
-		HArray :       []int{50, 51, 52, 51, 52},
-		HWSArray :     []int{60, 61, 62, 61, 62},
-		SystemPress:   2.0,
-		RechargeCount: 3,
+		ConnectionState :   OK,
+		AlarmsMutex		:   sync.Mutex{},
+		Alarms   		:   map[string]int{"Котёл1":0, "Котёл2":0, "Насос ГВС1":0, "Насос ГВС2":0, "Насос ОТ1":0, "Насос ОТ2":0  },
+		Boiler1State   	:   OFF,
+		Boiler2State  	:   OFF,
+		TempOutdoorNow 	:   25.0,
+		GVSTMutex       :	sync.Mutex{},
+		GVSTArray      	:   []float64{50,50,50,50,50,50,50,50,50,50,50,50},
+		HTMutex			: 	sync.Mutex{},
+		HTArray			:   []float64{50,50,50,50,50,50,50,50,50,50,50,50},
+		SystemPress    	: 	3.0,
+		ReCoMutex		:   sync.Mutex{},
+		RechargeCount  	:   0,
 	}
 )

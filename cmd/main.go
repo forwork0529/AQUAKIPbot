@@ -10,8 +10,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"path/filepath"
-	"runtime"
+	//"path/filepath"
 	"time"
 )
 
@@ -30,15 +29,12 @@ func main(){
 
 func getToken()string{
 
-	_, b, _, _ := runtime.Caller(0)
-	projectRootPath := filepath.Join(filepath.Dir(b), "../")
-	tokenPath := projectRootPath + "/files/token.txt"
 
-	tokenB, err := os.ReadFile(tokenPath)
+	tokenB, err := os.ReadFile("./token.txt")
 
 	if err != nil{
 		pwd, err := os.Getwd()
-		tokenB, err = os.ReadFile(pwd + `\files\token.txt`)
+		tokenB, err = os.ReadFile(pwd + `/token.txt`)
 			if err != nil{
 				log.Fatalf("cant read token file: %v", err)
 			}
